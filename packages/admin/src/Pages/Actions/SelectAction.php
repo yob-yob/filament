@@ -12,6 +12,7 @@ class SelectAction extends Action
     protected array | Arrayable | Closure $options = [];
 
     protected ?string $placeholder = null;
+
     protected $selected = null;
 
     protected function setUp(): void
