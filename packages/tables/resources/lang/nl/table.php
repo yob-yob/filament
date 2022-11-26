@@ -4,16 +4,12 @@ return [
 
     'columns' => [
 
-        'color' => [
-
-            'messages' => [
-                'copied' => 'Gekopieerd',
-            ],
-
-        ],
-
         'tags' => [
             'more' => 'en :count meer',
+        ],
+
+        'messages' => [
+            'copied' => 'Gekopieerd',
         ],
 
     ],
@@ -150,6 +146,29 @@ return [
 
             'deselect_all' => [
                 'label' => 'Alles deselecteren',
+            ],
+
+        ],
+
+    ],
+
+    'sorting' => [
+
+        'fields' => [
+
+            'column' => [
+                'label' => 'Sorteren op',
+            ],
+
+            'direction' => [
+
+                'label' => 'Sorteerrichting',
+
+                'options' => [
+                    'asc' => 'Oplopend',
+                    'desc' => 'Aflopend',
+                ],
+
             ],
 
         ],

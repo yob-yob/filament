@@ -1,14 +1,23 @@
 <?php
 
 return [
+
     'builder' => [
 
         'collapsed' => 'Inhoud ingeklapt',
 
         'buttons' => [
 
+            'clone_item' => [
+                'label' => 'Klonen',
+            ],
+
             'create_item' => [
                 'label' => 'Toevoegen aan :label',
+            ],
+
+            'create_item_between' => [
+                'label' => 'Invoegen',
             ],
 
             'delete_item' => [
@@ -47,6 +56,22 @@ return [
 
     ],
 
+    'checkbox_list' => [
+
+        'buttons' => [
+
+            'deselect_all' => [
+                'label' => 'Alles deselecteren',
+            ],
+
+            'select_all' => [
+                'label' => 'Alles selecteren',
+            ],
+
+        ],
+
+    ],
+
     'key_value' => [
 
         'buttons' => [
@@ -57,6 +82,10 @@ return [
 
             'delete' => [
                 'label' => 'Rij verwijderen',
+            ],
+
+            'reorder' => [
+                'label' => 'Rij herordenen',
             ],
 
         ],
@@ -107,7 +136,7 @@ return [
             ],
 
             'clone_item' => [
-                'label' => 'Dupliceren',
+                'label' => 'Klonen',
             ],
 
             'move_item' => [
@@ -210,6 +239,8 @@ return [
         ],
 
         'loading_message' => 'Laden...',
+
+        'max_items_message' => 'Er kunnen maar :count geselecteerd worden.',
 
         'no_search_results_message' => 'Er zijn geen resultaten voor je zoekopdracht.',
 

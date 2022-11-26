@@ -3,8 +3,10 @@
 namespace Filament\Tables\Concerns;
 
 use Closure;
+use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\Column;
 use Filament\Tables\Columns\Contracts\Editable;
+use Filament\Tables\Columns\Layout\Component;
 use Filament\Tables\Contracts\HasRelationshipTable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -15,14 +17,39 @@ trait HasColumns
 {
     protected array $cachedTableColumns;
 
+    protected array $cachedTableColumnsLayout;
+
+    protected ?Component $cachedTableCollapsibleColumnsLayout = null;
+
+    protected bool $hasTableColumnsLayout = false;
+
     public function cacheTableColumns(): void
     {
         $this->cachedTableColumns = [];
+        $this->cachedTableColumnsLayout = [];
 
-        foreach ($this->getTableColumns() as $column) {
-            $column->table($this->getCachedTable());
+        $components = Action::configureUsing(
+            Closure::fromCallable([$this, 'configureTableAction']),
+            fn (): array => $this->getTableColumns(),
+        );
 
-            $this->cachedTableColumns[$column->getName()] = $column;
+        foreach ($components as $component) {
+            $component->table($this->getCachedTable());
+
+            if ($component instanceof Component && $component->isCollapsible()) {
+                $this->cachedTableCollapsibleColumnsLayout = $component;
+            } else {
+                $this->cachedTableColumnsLayout[] = $component;
+            }
+
+            if ($component instanceof Column) {
+                $this->cachedTableColumns[$component->getName()] = $component;
+
+                continue;
+            }
+
+            $this->hasTableColumnsLayout = true;
+            $this->cachedTableColumns = array_merge($this->cachedTableColumns, $component->getColumns());
         }
     }
 
@@ -56,6 +83,21 @@ trait HasColumns
     public function getCachedTableColumns(): array
     {
         return $this->cachedTableColumns;
+    }
+
+    public function getCachedTableColumnsLayout(): array
+    {
+        return $this->cachedTableColumnsLayout;
+    }
+
+    public function getCachedCollapsibleTableColumnsLayout(): ?Component
+    {
+        return $this->cachedTableCollapsibleColumnsLayout;
+    }
+
+    public function hasTableColumnsLayout(): bool
+    {
+        return $this->hasTableColumnsLayout || $this->getTableContentGrid();
     }
 
     public function getCachedTableColumn(string $name): ?Column

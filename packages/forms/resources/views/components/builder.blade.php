@@ -5,6 +5,8 @@
     :label-sr-only="$isLabelHidden()"
     :helper-text="$getHelperText()"
     :hint="$getHint()"
+    :hint-action="$getHintAction()"
+    :hint-color="$getHintColor()"
     :hint-icon="$getHintIcon()"
     :required="$isRequired()"
     :state-path="$getStatePath()"
@@ -12,6 +14,7 @@
     @php
         $containers = $getChildComponentContainers();
 
+        $isCloneable = $isCloneable();
         $isCollapsible = $isCollapsible();
         $isItemCreationDisabled = $isItemCreationDisabled();
         $isItemDeletionDisabled = $isItemDeletionDisabled();
@@ -90,7 +93,7 @@
                             'dark:bg-gray-800 dark:border-gray-600' => config('forms.dark_mode'),
                         ])
                     >
-                        @if ((! $isItemMovementDisabled) || $hasBlockLabels || (! $isItemDeletionDisabled) || $isCollapsible)
+                        @if ((! $isItemMovementDisabled) || $hasBlockLabels || (! $isItemDeletionDisabled) || $isCollapsible || $isCloneable)
                             <header @class([
                                 'flex items-center h-10 overflow-hidden border-b bg-gray-50 rounded-t-xl',
                                 'dark:bg-gray-800 dark:border-gray-700' => config('forms.dark_mode'),
@@ -103,8 +106,8 @@
                                         wire:keydown.prevent.arrow-down="dispatchFormEvent('builder::moveItemDown', '{{ $getStatePath() }}', '{{ $uuid }}')"
                                         type="button"
                                         @class([
-                                            'flex items-center justify-center flex-none w-10 h-10 text-gray-400 border-r rtl:border-l rtl:border-r-0 transition hover:text-gray-300',
-                                            'dark:text-gray-400 dark:border-gray-700 dark:hover:text-gray-500' => config('forms.dark_mode'),
+                                            'flex items-center justify-center flex-none w-10 h-10 text-gray-400 border-r rtl:border-l rtl:border-r-0 transition hover:text-gray-500',
+                                            'dark:border-gray-700' => config('forms.dark_mode'),
                                         ])
                                     >
                                         <span class="sr-only">
@@ -144,6 +147,26 @@
                                     'flex divide-x rtl:divide-x-reverse',
                                     'dark:divide-gray-700' => config('forms.dark_mode'),
                                 ])>
+                                    @if ($isCloneable)
+                                        <li>
+                                            <button
+                                                title="{{ __('forms::components.builder.buttons.clone_item.label') }}"
+                                                wire:click="dispatchFormEvent('builder::cloneItem', '{{ $getStatePath() }}', '{{ $uuid }}')"
+                                                type="button"
+                                                @class([
+                                                    'flex items-center justify-center flex-none w-10 h-10 text-gray-400 transition hover:text-gray-500',
+                                                    'dark:border-gray-700' => config('forms.dark_mode'),
+                                                ])
+                                            >
+                                                <span class="sr-only">
+                                                    {{ __('forms::components.builder.buttons.clone_item.label') }}
+                                                </span>
+
+                                                <x-heroicon-s-duplicate class="w-4 h-4"/>
+                                            </button>
+                                        </li>
+                                    @endif
+
                                     @unless ($isItemDeletionDisabled)
                                         <li>
                                             <button
@@ -170,10 +193,7 @@
                                                 x-bind:title="(! isCollapsed) ? '{{ __('forms::components.builder.buttons.collapse_item.label') }}' : '{{ __('forms::components.builder.buttons.expand_item.label') }}'"
                                                 x-on:click="isCollapsed = ! isCollapsed"
                                                 type="button"
-                                                @class([
-                                                    'flex items-center justify-center flex-none w-10 h-10 text-gray-400 transition hover:text-gray-300',
-                                                    'dark:text-gray-400 dark:hover:text-gray-500' => config('forms.dark_mode'),
-                                                ])
+                                                class="flex items-center justify-center flex-none w-10 h-10 text-gray-400 transition hover:text-gray-500"
                                             >
                                                 <x-heroicon-s-minus-sm class="w-4 h-4" x-show="! isCollapsed"/>
 
@@ -205,7 +225,7 @@
                             <div
                                 x-show="isCreateButtonVisible"
                                 x-transition
-                                class="absolute inset-x-0 bottom-0 z-10 flex items-center justify-center h-12 -mb-12"
+                                class="absolute inset-x-0 bottom-0 flex items-center justify-center h-12 -mb-12"
                             >
                                 <x-forms::dropdown>
                                     <x-slot name="trigger">

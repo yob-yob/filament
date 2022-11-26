@@ -17,10 +17,13 @@ export default (Alpine) => {
             hasDynamicSearchResults,
             loadingMessage,
             maxItems,
+            maxItemsMessage,
             noSearchResultsMessage,
             options,
             optionsLimit,
             placeholder,
+            position,
+            searchDebounce,
             searchingMessage,
             searchPrompt,
             state,
@@ -43,9 +46,14 @@ export default (Alpine) => {
                         itemSelectText: '',
                         loadingText: loadingMessage,
                         maxItemCount: maxItems ?? -1,
+                        maxItemText: (maxItemCount) =>
+                            window.pluralize(maxItemsMessage, maxItemCount, {
+                                count: maxItemCount,
+                            }),
                         noChoicesText: searchPrompt,
                         noResultsText: noSearchResultsMessage,
                         placeholderValue: placeholder,
+                        position: position ?? 'auto',
                         removeItemButton: true,
                         renderChoiceLimit: optionsLimit,
                         searchFields: ['label'],
@@ -128,7 +136,7 @@ export default (Alpine) => {
                                 })
 
                                 this.isSearching = false
-                            }, 1000),
+                            }, searchDebounce),
                         )
                     }
 
@@ -164,9 +172,11 @@ export default (Alpine) => {
                 },
 
                 getChoices: async function (config = {}) {
-                    const options = await this.getOptions(config)
+                    const existingOptions = await this.getOptions(config)
 
-                    return options.concat(await this.getMissingOptions(options))
+                    return existingOptions.concat(
+                        await this.getMissingOptions(existingOptions),
+                    )
                 },
 
                 getOptions: async function ({ search, withInitialOptions }) {
@@ -209,27 +219,33 @@ export default (Alpine) => {
                     return state?.toString()
                 },
 
-                getMissingOptions: async function (options) {
+                getMissingOptions: async function (existingOptions) {
                     let state = this.formatState(this.state)
 
                     if ([null, undefined, '', [], {}].includes(state)) {
                         return {}
                     }
 
-                    if (!options.length) {
-                        options = {}
-                    }
+                    const existingOptionValues = new Set(
+                        existingOptions.length
+                            ? existingOptions.map((option) => option.value)
+                            : [],
+                    )
 
                     if (isMultiple) {
-                        if (state.every((value) => value in options)) {
+                        if (
+                            state.every((value) =>
+                                existingOptionValues.has(value),
+                            )
+                        ) {
                             return {}
                         }
 
                         return await getOptionLabelsUsing()
                     }
 
-                    if (state in options) {
-                        return options
+                    if (existingOptionValues.has(state)) {
+                        return existingOptionValues
                     }
 
                     return [

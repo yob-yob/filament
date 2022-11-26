@@ -8,8 +8,16 @@ return [
 
         'buttons' => [
 
+            'clone_item' => [
+                'label' => 'Duplikat',
+            ],
+
             'create_item' => [
                 'label' => 'Tambahkan :label',
+            ],
+
+            'create_item_between' => [
+                'label' => 'Sisipkan',
             ],
 
             'delete_item' => [
@@ -48,6 +56,22 @@ return [
 
     ],
 
+    'checkbox_list' => [
+
+        'buttons' => [
+
+            'deselect_all' => [
+                'label' => 'Batalkan semua pilihan',
+            ],
+
+            'select_all' => [
+                'label' => 'Pilih semua',
+            ],
+
+        ],
+
+    ],
+
     'key_value' => [
 
         'buttons' => [
@@ -58,6 +82,10 @@ return [
 
             'delete' => [
                 'label' => 'Hapus baris',
+            ],
+
+            'reorder' => [
+                'label' => 'Ubah urutan baris',
             ],
 
         ],
@@ -212,7 +240,9 @@ return [
 
         'loading_message' => 'Memuat...',
 
-        'no_search_results_message' => 'Tidak ada data yang sesuai dengan pencarian anda.',
+        'max_items_message' => 'Hanya :count yang dapat dipilih.',
+
+        'no_search_results_message' => 'Tidak ada hasil yang sesuai dengan pencarian Anda.',
 
         'placeholder' => 'Pilih salah satu opsi',
 

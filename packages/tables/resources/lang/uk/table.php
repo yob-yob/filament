@@ -4,16 +4,12 @@ return [
 
     'columns' => [
 
-        'color' => [
-
-            'messages' => [
-                'copied' => 'Скопійовано',
-            ],
-
-        ],
-
         'tags' => [
             'more' => 'і :count ще',
+        ],
+
+        'messages' => [
+            'copied' => 'Скопійовано',
         ],
 
     ],
@@ -150,6 +146,29 @@ return [
 
             'deselect_all' => [
                 'label' => 'Прибрати виділення з усіх',
+            ],
+
+        ],
+
+    ],
+
+    'sorting' => [
+
+        'fields' => [
+
+            'column' => [
+                'label' => 'Сортування',
+            ],
+
+            'direction' => [
+
+                'label' => 'Напрямок сортування',
+
+                'options' => [
+                    'asc' => 'За зростанням',
+                    'desc' => 'За зменшенням',
+                ],
+
             ],
 
         ],

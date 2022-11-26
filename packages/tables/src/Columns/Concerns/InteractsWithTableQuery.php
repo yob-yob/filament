@@ -66,6 +66,8 @@ trait InteractsWithTableQuery
                 'search' => $search,
             ]);
 
+            $isFirst = false;
+
             return $query;
         }
 
@@ -150,6 +152,7 @@ trait InteractsWithTableQuery
                             $query,
                             $sortColumn,
                         )
+                        ->applyScopes()
                         ->getQuery(),
                     $direction,
                 ),

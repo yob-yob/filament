@@ -16,6 +16,8 @@ class Wizard extends Component
 
     protected bool | Closure $skippable = false;
 
+    protected string | Closure | null $stepQueryStringKey = null;
+
     protected string | Htmlable | null $submitAction = null;
 
     public int | Closure $startStep = 1;
@@ -46,12 +48,14 @@ class Wizard extends Component
                         return;
                     }
 
-                    /** @var Step $currentStep */
-                    $currentStep = $component->getChildComponentContainer()->getComponents()[$currentStep];
+                    if (! $component->isSkippable()) {
+                        /** @var Step $currentStep */
+                        $currentStep = $component->getChildComponentContainer()->getComponents()[$currentStep];
 
-                    $currentStep->callBeforeValidation();
-                    $currentStep->getChildComponentContainer()->validate();
-                    $currentStep->callAfterValidation();
+                        $currentStep->callBeforeValidation();
+                        $currentStep->getChildComponentContainer()->validate();
+                        $currentStep->callAfterValidation();
+                    }
 
                     /** @var LivewireComponent $livewire */
                     $livewire = $component->getLivewire();
@@ -98,6 +102,13 @@ class Wizard extends Component
         return $this;
     }
 
+    public function persistStepInQueryString(string | Closure | null $key = 'step'): static
+    {
+        $this->stepQueryStringKey = $key;
+
+        return $this;
+    }
+
     public function getCancelAction(): string | Htmlable | null
     {
         return $this->cancelAction;
@@ -110,11 +121,33 @@ class Wizard extends Component
 
     public function getStartStep(): int
     {
+        if ($this->isStepPersistedInQueryString()) {
+            $queryStringStep = request()->query($this->getStepQueryStringKey());
+
+            foreach ($this->getChildComponents() as $index => $step) {
+                if ($step->getId() !== $queryStringStep) {
+                    continue;
+                }
+
+                return $index + 1;
+            }
+        }
+
         return $this->evaluate($this->startStep);
+    }
+
+    public function getStepQueryStringKey(): ?string
+    {
+        return $this->evaluate($this->stepQueryStringKey);
     }
 
     public function isSkippable(): bool
     {
         return $this->evaluate($this->skippable);
+    }
+
+    public function isStepPersistedInQueryString(): bool
+    {
+        return filled($this->getStepQueryStringKey());
     }
 }

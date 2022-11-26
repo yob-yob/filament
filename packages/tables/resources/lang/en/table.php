@@ -4,16 +4,12 @@ return [
 
     'columns' => [
 
-        'color' => [
-
-            'messages' => [
-                'copied' => 'Copied',
-            ],
-
-        ],
-
         'tags' => [
             'more' => 'and :count more',
+        ],
+
+        'messages' => [
+            'copied' => 'Copied',
         ],
 
     ],
@@ -150,6 +146,29 @@ return [
 
             'deselect_all' => [
                 'label' => 'Deselect all',
+            ],
+
+        ],
+
+    ],
+
+    'sorting' => [
+
+        'fields' => [
+
+            'column' => [
+                'label' => 'Sort by',
+            ],
+
+            'direction' => [
+
+                'label' => 'Sort direction',
+
+                'options' => [
+                    'asc' => 'Ascending',
+                    'desc' => 'Descending',
+                ],
+
             ],
 
         ],

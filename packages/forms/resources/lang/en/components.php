@@ -8,8 +8,16 @@ return [
 
         'buttons' => [
 
+            'clone_item' => [
+                'label' => 'Clone',
+            ],
+
             'create_item' => [
                 'label' => 'Add to :label',
+            ],
+
+            'create_item_between' => [
+                'label' => 'Insert',
             ],
 
             'delete_item' => [
@@ -48,16 +56,36 @@ return [
 
     ],
 
+    'checkbox_list' => [
+
+        'buttons' => [
+
+            'deselect_all' => [
+                'label' => 'Deselect all',
+            ],
+
+            'select_all' => [
+                'label' => 'Select all',
+            ],
+
+        ],
+
+    ],
+
     'key_value' => [
 
         'buttons' => [
 
             'add' => [
-                'label' => 'Add Row',
+                'label' => 'Add row',
             ],
 
             'delete' => [
-                'label' => 'Delete Row',
+                'label' => 'Delete row',
+            ],
+
+            'reorder' => [
+                'label' => 'Reorder row',
             ],
 
         ],
@@ -211,6 +239,8 @@ return [
         ],
 
         'loading_message' => 'Loading...',
+
+        'max_items_message' => 'Only :count can be selected.',
 
         'no_search_results_message' => 'No options match your search.',
 

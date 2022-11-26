@@ -8,6 +8,10 @@ return [
             'more' => 'و :count أكثر',
         ],
 
+        'messages' => [
+            'copied' => 'تم النسخ',
+        ],
+
     ],
 
     'fields' => [
@@ -89,14 +93,22 @@ return [
 
         'buttons' => [
 
+            'remove' => [
+                'label' => 'إلغاء الفلاتر',
+            ],
+
+            'remove_all' => [
+                'label' => 'إلغاء كافة الفلاتر',
+                'tooltip' => 'إلغاء كافة الفلاتر',
+            ],
+
             'reset' => [
-                'label' => 'إعادة ضبط المصفيات',
-                'tooltip' => 'إعادة ضبط المصفيات',
+                'label' => 'إعادة ضبط الفلاتر',
             ],
 
         ],
 
-        'indicator' => 'المصفيات النشطة',
+        'indicator' => 'الفلاتر النشطة',
 
         'multi_select' => [
             'placeholder' => 'الكل',
@@ -134,6 +146,29 @@ return [
 
             'deselect_all' => [
                 'label' => 'إلغاء تحديد الكل',
+            ],
+
+        ],
+
+    ],
+
+    'sorting' => [
+
+        'fields' => [
+
+            'column' => [
+                'label' => 'ترتيب حسب',
+            ],
+
+            'direction' => [
+
+                'label' => 'اتجاه الترتيب',
+
+                'options' => [
+                    'asc' => 'تصاعدي',
+                    'desc' => 'تنازلي',
+                ],
+
             ],
 
         ],

@@ -4,16 +4,12 @@ return [
 
     'columns' => [
 
-        'color' => [
-
-            'messages' => [
-                'copied' => 'Disalin',
-            ],
-
-        ],
-
         'tags' => [
             'more' => 'dan :count lainnya',
+        ],
+
+        'messages' => [
+            'copied' => 'Disalin',
         ],
 
     ],
@@ -150,6 +146,29 @@ return [
 
             'deselect_all' => [
                 'label' => 'Batalkan semua pilihan',
+            ],
+
+        ],
+
+    ],
+
+    'sorting' => [
+
+        'fields' => [
+
+            'column' => [
+                'label' => 'Urutkan menurut',
+            ],
+
+            'direction' => [
+
+                'label' => 'Arah urutan',
+
+                'options' => [
+                    'asc' => 'Naik',
+                    'desc' => 'Turun',
+                ],
+
             ],
 
         ],

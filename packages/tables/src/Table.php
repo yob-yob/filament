@@ -9,9 +9,11 @@ use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Actions\BulkAction;
 use Filament\Tables\Actions\Position;
 use Filament\Tables\Columns\Column;
+use Filament\Tables\Columns\Layout\Component;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Filters\Layout;
 use Illuminate\Contracts\Pagination\Paginator;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
@@ -25,7 +27,7 @@ class Table extends ViewComponent
 
     protected string $viewIdentifier = 'table';
 
-    public const LOADING_TARGETS = ['previousPage', 'nextPage', 'gotoPage', 'sortTable', 'tableFilters', 'resetTableFiltersForm', 'tableSearchQuery', 'tableColumnSearchQueries', 'tableRecordsPerPage', '$set'];
+    public const LOADING_TARGETS = ['previousPage', 'nextPage', 'gotoPage', 'sortTable', 'tableFilters', 'resetTableFiltersForm', 'tableSearchQuery', 'tableColumnSearchQueries', 'tableRecordsPerPage'];
 
     final public function __construct(HasTable $livewire)
     {
@@ -47,7 +49,27 @@ class Table extends ViewComponent
         /** @var TableComponent $livewire */
         $livewire = $this->getLivewire();
 
-        return invade($livewire)->getTableActionsPosition() ?? Position::AfterCells;
+        $position = invade($livewire)->getTableActionsPosition();
+
+        if ($position) {
+            return $position;
+        }
+
+        if (! ($this->getContentGrid() || $this->hasColumnsLayout())) {
+            return Position::AfterCells;
+        }
+
+        $actions = $this->getActions();
+
+        $firstAction = Arr::first($actions);
+
+        if ($firstAction instanceof ActionGroup) {
+            $firstAction->size('sm md:md');
+
+            return Position::BottomCorner;
+        }
+
+        return Position::AfterContent;
     }
 
     public function getActionsColumnLabel(): ?string
@@ -79,12 +101,35 @@ class Table extends ViewComponent
         );
     }
 
+    public function getColumnsLayout(): array
+    {
+        return $this->getLivewire()->getCachedTableColumnsLayout();
+    }
+
+    public function getCollapsibleColumnsLayout(): ?Component
+    {
+        return $this->getLivewire()->getCachedCollapsibleTableColumnsLayout();
+    }
+
+    public function hasColumnsLayout(): bool
+    {
+        return $this->getLivewire()->hasTableColumnsLayout();
+    }
+
     public function getContent(): ?View
     {
         /** @var TableComponent $livewire */
         $livewire = $this->getLivewire();
 
         return invade($livewire)->getTableContent();
+    }
+
+    public function getContentGrid(): ?array
+    {
+        /** @var TableComponent $livewire */
+        $livewire = $this->getLivewire();
+
+        return invade($livewire)->getTableContentGrid();
     }
 
     public function getContentFooter(): ?View
@@ -95,7 +140,7 @@ class Table extends ViewComponent
         return invade($livewire)->getTableContentFooter();
     }
 
-    public function getDescription(): ?string
+    public function getDescription(): string | Htmlable | null
     {
         /** @var TableComponent $livewire */
         $livewire = $this->getLivewire();
@@ -182,7 +227,7 @@ class Table extends ViewComponent
         return invade($livewire)->getTableColumnToggleFormWidth();
     }
 
-    public function getHeader(): ?View
+    public function getHeader(): View | Htmlable | null
     {
         /** @var TableComponent $livewire */
         $livewire = $this->getLivewire();
@@ -198,7 +243,7 @@ class Table extends ViewComponent
         );
     }
 
-    public function getHeading(): ?string
+    public function getHeading(): string | Htmlable | null
     {
         /** @var TableComponent $livewire */
         $livewire = $this->getLivewire();
