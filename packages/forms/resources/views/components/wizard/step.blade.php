@@ -22,9 +22,17 @@
             return
         }
 
-        setTimeout(() => $el.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'start' }), 200)
+        setTimeout(
+            () =>
+                $el.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start',
+                    inline: 'start',
+                }),
+            200,
+        )
     "
-    {{ $attributes->merge($getExtraAttributes())->class(['focus:outline-none filament-forms-wizard-component-step']) }}
+    {{ $attributes->merge($getExtraAttributes())->class(['filament-forms-wizard-component-step outline-none']) }}
 >
     {{ $getChildComponentContainer() }}
 </div>

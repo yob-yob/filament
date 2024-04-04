@@ -18,7 +18,7 @@ it('sends a notification', function () {
 ```
 
 ```php
-use Filament\Notifications\Notification
+use Filament\Notifications\Notification;
 
 it('sends a notification', function () {
     Notification::assertNotified();
@@ -26,7 +26,7 @@ it('sends a notification', function () {
 ```
 
 ```php
-use function Filament\Notifications\Testing\assetNotified;
+use function Filament\Notifications\Testing\assertNotified;
 
 it('sends a notification', function () {
     assertNotified();
@@ -55,7 +55,7 @@ it('sends a notification', function () {
     livewire(CreatePost::class)
         ->assertNotified(
             Notification::make()
-                ->danger(),
+                ->danger()
                 ->title('Unable to create post')
                 ->body('Something went wrong.'),
         );

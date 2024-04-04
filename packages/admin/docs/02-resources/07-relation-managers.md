@@ -218,11 +218,12 @@ At any time, you may call `$action->halt()` from inside a lifecycle hook or muta
 ```php
 use Filament\Notifications\Actions\Action;
 use Filament\Notifications\Notification;
+use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Actions\CreateAction;
 
 CreateAction::make()
-    ->before(function (CreateAction $action) {
-        if (! $this->ownerRecord->team->subscribed()) {
+    ->before(function (CreateAction $action, RelationManager $livewire) {
+        if (! $livewire->ownerRecord->team->subscribed()) {
             Notification::make()
                 ->warning()
                 ->title('You don\'t have an active subscription!')
@@ -373,11 +374,12 @@ At any time, you may call `$action->halt()` from inside a lifecycle hook or muta
 ```php
 use Filament\Notifications\Actions\Action;
 use Filament\Notifications\Notification;
+use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Actions\EditAction;
 
 EditAction::make()
-    ->before(function (EditAction $action) {
-        if (! $this->ownerRecord->team->subscribed()) {
+    ->before(function (EditAction $action, RelationManager $livewire) {
+        if (! $livewire->ownerRecord->team->subscribed()) {
             Notification::make()
                 ->warning()
                 ->title('You don\'t have an active subscription!')
@@ -493,7 +495,7 @@ protected bool $allowsDuplicates = true;
 
 ## Associating and dissociating records
 
-Filament is able to associate and dissociate records for `HasMany`, `HasManyThrough` and `MorphMany` relationships.
+Filament is able to associate and dissociate records for `HasMany` and `MorphMany` relationships.
 
 When generating your relation manager, you may pass the `--associate` flag to also add `AssociateAction`, `DissociateAction` and `DissociateBulkAction` to the table:
 
@@ -649,11 +651,12 @@ At any time, you may call `$action->halt()` from inside a lifecycle hook or muta
 ```php
 use Filament\Notifications\Actions\Action;
 use Filament\Notifications\Notification;
+use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Actions\DeleteAction;
 
 DeleteAction::make()
-    ->before(function (DeleteAction $action) {
-        if (! $this->ownerRecord->team->subscribed()) {
+    ->before(function (DeleteAction $action, RelationManager $livewire) {
+        if (! $livewire->ownerRecord->team->subscribed()) {
             Notification::make()
                 ->warning()
                 ->title('You don\'t have an active subscription!')

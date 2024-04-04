@@ -47,6 +47,8 @@ class Page extends Component implements Forms\Contracts\HasForms, RendersFormCom
 
     protected static string | array $middlewares = [];
 
+    protected static string | array $withoutRouteMiddleware = [];
+
     public static ?Closure $reportValidationErrorUsing = null;
 
     protected ?string $maxContentWidth = null;
@@ -88,6 +90,7 @@ class Page extends Component implements Forms\Contracts\HasForms, RendersFormCom
 
             Route::get($slug, static::class)
                 ->middleware(static::getMiddlewares())
+                ->withoutMiddleware(static::getWithoutRouteMiddleware())
                 ->name($slug);
         };
     }
@@ -95,6 +98,11 @@ class Page extends Component implements Forms\Contracts\HasForms, RendersFormCom
     public static function getMiddlewares(): string | array
     {
         return static::$middlewares;
+    }
+
+    public static function getWithoutRouteMiddleware(): string | array
+    {
+        return static::$withoutRouteMiddleware;
     }
 
     public static function getSlug(): string
@@ -188,7 +196,7 @@ class Page extends Component implements Forms\Contracts\HasForms, RendersFormCom
         return $this->filterVisibleWidgets($this->getHeaderWidgets());
     }
 
-    protected function getHeaderWidgetsColumns(): int | array
+    protected function getHeaderWidgetsColumns(): int | string | array
     {
         return 2;
     }
@@ -208,7 +216,7 @@ class Page extends Component implements Forms\Contracts\HasForms, RendersFormCom
         return array_filter($widgets, fn (string $widget): bool => $widget::canView());
     }
 
-    protected function getFooterWidgetsColumns(): int | array
+    protected function getFooterWidgetsColumns(): int | string | array
     {
         return 2;
     }
@@ -223,7 +231,7 @@ class Page extends Component implements Forms\Contracts\HasForms, RendersFormCom
         return $this->subheading;
     }
 
-    protected function getTitle(): string
+    protected function getTitle(): string | Htmlable
     {
         return static::$title ?? (string) Str::of(class_basename(static::class))
             ->kebab()

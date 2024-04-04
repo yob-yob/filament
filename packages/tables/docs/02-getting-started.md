@@ -290,7 +290,9 @@ protected function applySearchToTableQuery(Builder $query): Builder
 
 Scout uses this `whereIn()` method to retrieve results internally, so there is no performance penalty for using it.
 
-## Record URLs (clickable rows)
+## Clickable rows
+
+### Record URLs
 
 You may allow table rows to be completely clickable by overriding the `getTableRecordUrlUsing()` method on your Livewire component:
 
@@ -298,7 +300,7 @@ You may allow table rows to be completely clickable by overriding the `getTableR
 use Closure;
 use Illuminate\Database\Eloquent\Model;
 
-protected function getTableRecordUrlUsing(): Closure
+protected function getTableRecordUrlUsing(): ?Closure
 {
     return fn (Model $record): string => route('posts.edit', ['record' => $record]);
 }
@@ -307,6 +309,36 @@ protected function getTableRecordUrlUsing(): Closure
 In this example, clicking on each post will take you to the `posts.edit` route.
 
 If you'd like to [override the URL](columns/getting-started#opening-urls) for a specific column, or instead [run a Livewire action](columns#running-actions) when a column is clicked, see the [columns documentation](columns#opening-urls).
+
+### Record actions
+
+Alternatively, you may configure table rows to trigger an action instead of opening a URL:
+
+```php
+use Closure;
+use Filament\Tables\Actions\Action;
+use Filament\Tables\Actions\DeleteAction;
+
+protected function getTableRecordActionUsing(): ?Closure
+{
+    return fn (): string => 'edit';
+}
+```
+
+In this case, if an `EditAction` or another action with the name `edit` exists on the table row, that will be called. If not, a Livewire public method with the name `edit()` will be called, and the selected record will be passed.
+
+### Disabling clickable rows
+
+If you'd like to completely disable the click action for the entire row, you may override the `getTableRecordActionUsing()` method on your Livewire component, and return `null`:
+
+```php
+use Closure;
+
+protected function getTableRecordActionUsing(): ?Closure
+{
+    return null;
+}
+```
 
 ## Record classes
 
@@ -333,7 +365,7 @@ protected function getTableRecordClassesUsing(): ?Closure
 These classes are not automatically compiled by Tailwind CSS. If you want to apply Tailwind CSS classes that are not already used in Blade files, you should update your `content` configuration in `tailwind.config.js` to also scan for classes in your desired PHP files:
 
 ```js
-module.exports = {
+export default {
     content: ['./app/Filament/**/*.php'],
 }
 ```
@@ -341,7 +373,7 @@ module.exports = {
 Alternatively, you may add the classes to your [safelist](https://tailwindcss.com/docs/content-configuration#safelisting-classes):
 
 ```js
-module.exports = {
+export default {
     safelist: [
         'border-green-600',
         'border-l-2',

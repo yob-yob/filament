@@ -5,9 +5,10 @@ namespace Filament\Resources;
 use Closure;
 use Filament\Facades\Filament;
 use Filament\GlobalSearch\GlobalSearchResult;
-use function Filament\locale_has_pluralization;
 use Filament\Navigation\NavigationItem;
 use function Filament\Support\get_model_label;
+use function Filament\Support\locale_has_pluralization;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Connection;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -64,7 +65,11 @@ class Resource
 
     protected static string | array $middlewares = [];
 
+    protected static string | array $withoutRouteMiddleware = [];
+
     protected static int $globalSearchResultsLimit = 50;
+
+    protected static bool $shouldAuthorizeWithGate = false;
 
     protected static bool $shouldIgnorePolicies = false;
 
@@ -116,13 +121,18 @@ class Resource
 
     public static function can(string $action, ?Model $record = null): bool
     {
+        $user = Filament::auth()->user();
+        $model = static::getModel();
+
+        if (static::shouldAuthorizeWithGate()) {
+            return Gate::forUser($user)->check($action, $record ?? $model);
+        }
+
         if (static::shouldIgnorePolicies()) {
             return true;
         }
 
-        $policy = Gate::getPolicyFor($model = static::getModel());
-        $user = Filament::auth()->user();
-
+        $policy = Gate::getPolicyFor($model);
         if ($policy === null) {
             return true;
         }
@@ -134,9 +144,19 @@ class Resource
         return Gate::forUser($user)->check($action, $record ?? $model);
     }
 
+    public static function authorizeWithGate(bool $condition = true): void
+    {
+        static::$shouldAuthorizeWithGate = $condition;
+    }
+
     public static function ignorePolicies(bool $condition = true): void
     {
         static::$shouldIgnorePolicies = $condition;
+    }
+
+    public static function shouldAuthorizeWithGate(): bool
+    {
+        return static::$shouldAuthorizeWithGate;
     }
 
     public static function shouldIgnorePolicies(): bool
@@ -265,6 +285,8 @@ class Resource
 
     public static function getGlobalSearchResults(string $searchQuery): Collection
     {
+        $searchQuery = strtolower($searchQuery);
+
         $query = static::getGlobalSearchEloquentQuery();
 
         foreach (explode(' ', $searchQuery) as $searchQueryWord) {
@@ -348,7 +370,7 @@ class Resource
         return static::$recordTitleAttribute;
     }
 
-    public static function getRecordTitle(?Model $record): ?string
+    public static function getRecordTitle(?Model $record): string | Htmlable | null
     {
         return $record?->getAttribute(static::getRecordTitleAttribute()) ?? static::getModelLabel();
     }
@@ -383,6 +405,7 @@ class Resource
             Route::name("{$slug}.")
                 ->prefix($slug)
                 ->middleware(static::getMiddlewares())
+                ->withoutMiddleware(static::getWithoutRouteMiddleware())
                 ->group(function () {
                     foreach (static::getPages() as $name => $page) {
                         Route::get($page['route'], $page['class'])->name($name);
@@ -394,6 +417,11 @@ class Resource
     public static function getMiddlewares(): string | array
     {
         return static::$middlewares;
+    }
+
+    public static function getWithoutRouteMiddleware(): string | array
+    {
+        return static::$withoutRouteMiddleware;
     }
 
     public static function getSlug(): string
@@ -451,7 +479,7 @@ class Resource
                     };
 
                     return $query->{"{$whereClause}Raw"}(
-                        "lower({$searchColumn}) {$searchOperator} lower(?)",
+                        "lower({$searchColumn}) {$searchOperator} ?",
                         "%{$searchQuery}%",
                     );
                 },

@@ -168,7 +168,7 @@ Fieldset::make('Metadata')
     ])
 ```
 
-In this example, the `title`, `description` and `image` is automatically loaded from saved to the `metadata` relationship, and saved again when the form is submitted. If the `metadata` record does not exist, it is automatically created.
+In this example, the `title`, `description` and `image` are automatically loaded from the `metadata` relationship, and saved again when the form is submitted. If the `metadata` record does not exist, it is automatically created.
 
 > To set this functionality up, **you must also follow the instructions set out in the [field relationships](getting-started#field-relationships) section**. If you're using the [admin panel](/docs/admin), you can skip this step.
 
@@ -319,6 +319,24 @@ Tabs::make('Heading')
     ])
 ```
 
+Icons can be modified using the `iconPosition()` and `iconColor()` methods:
+
+```php
+use Filament\Forms\Components\Tabs;
+
+Tabs::make('Heading')
+    ->tabs([
+        Tabs\Tab::make('Notifications')
+            ->icon('heroicon-o-bell')
+            ->iconPosition('after') // `before` or `after` [tl! focus:end]
+            ->iconColor('success') // `danger`, `primary`, `success`, `warning` or `secondary` [tl! focus:end]
+            ->schema([
+                // ...
+            ]),
+        // ...
+    ])
+```
+
 ## Wizard
 
 Similar to [tabs](#tabs), you may want to use a multistep form wizard to reduce the number of components that are visible at once. These are especially useful if your form has a definite chronological order, in which you want each step to be validated as the user progresses.
@@ -342,7 +360,7 @@ Wizard::make([
 ])
 ```
 
-> We have different setup instructions you're looking to add a wizard to an admin panel [resource Create page](../admin/resources/creating-records#wizards) or a table [action](../tables/actions#wizards). Following that documentation will ensure that the ability to submit the form is only available on the last step.
+> We have different setup instructions if you're looking to add a wizard to an admin panel [resource Create page](../admin/resources/creating-records#wizards) or a table [action](../tables/actions#wizards). Following that documentation will ensure that the ability to submit the form is only available on the last step.
 
 Each step has a mandatory label. You may optionally also add a description for extra detail:
 
@@ -482,6 +500,8 @@ Section::make('Heading')
 
 Placeholders can be used to render text-only "fields" within your forms. Each placeholder has `content()`, which cannot be changed by the user.
 
+> **Important:** All fields require a unique name. That also applies to Placeholders!
+
 ```php
 use Filament\Forms\Components\Placeholder;
 
@@ -522,6 +542,20 @@ Card::make()
         // ...
     ])
     ->columns(2)
+```
+
+## Inline labels
+
+You may use the `inlineLabel()` method to make the form labels and fields in separate columns, inline with each other. It works on all layout components, each field inside will have an inline label.
+
+```php
+use Filament\Forms\Components\Card;
+
+Card::make()
+    ->schema([
+        // ...
+    ])
+    ->inlineLabel()
 ```
 
 ## View

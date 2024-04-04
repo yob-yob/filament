@@ -4,7 +4,7 @@ title: Layout
 
 ## The problem with traditional table layouts
 
-Traditional tables are notorious for having bad responsivity. On mobile, there is only so much flexibility you have when rending content that is horizontally long:
+Traditional tables are notorious for having bad responsivity. On mobile, there is only so much flexibility you have when rendering content that is horizontally long:
 
 - Allow the user to scroll horizontally to see more table content
 - Hide non-important columns on smaller devices
@@ -254,6 +254,20 @@ use Filament\Tables\Columns\TextColumn;
         ]),
     ])->collapsible(),
 ]
+```
+
+You can expand a panel by default using the `collapsed(false)` method:
+
+```php
+use Filament\Tables\Columns\Layout\Panel;
+use Filament\Tables\Columns\TextColumn;
+
+Panel::make([
+    Stack::make([
+        TextColumn::make('email'),
+        TextColumn::make('phone'),
+    ]),
+])->collapsed(false)
 ```
 
 ![Collapsible content](https://user-images.githubusercontent.com/41773797/191834045-e423afd4-1ad3-4636-8635-fe9453423555.png)

@@ -63,9 +63,10 @@
             :visible="filled($action)"
             :width="$action?->getModalWidth()"
             :slide-over="$action?->isModalSlideOver()"
+            :close-by-clicking-away="$action?->isModalClosedByClickingAway()"
             display-classes="block"
-            x-init="this.livewire = $wire.__instance"
-            x-on:modal-closed.stop="if ('mountedAction' in this.livewire?.serverMemo.data) this.livewire.set('mountedAction', null)"
+            x-init="livewire = $wire.__instance"
+            x-on:modal-closed.stop="if ('mountedAction' in livewire?.serverMemo.data) livewire.set('mountedAction', null)"
         >
             @if ($action)
                 @if ($action->isModalCentered())
@@ -106,7 +107,9 @@
 
                 @if (count($action->getModalActions()))
                     <x-slot name="footer">
-                        <x-filament::modal.actions :full-width="$action->isModalCentered()">
+                        <x-filament::modal.actions
+                            :full-width="$action->isModalCentered()"
+                        >
                             @foreach ($action->getModalActions() as $modalAction)
                                 {{ $modalAction }}
                             @endforeach

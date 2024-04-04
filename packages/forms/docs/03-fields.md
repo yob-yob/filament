@@ -382,11 +382,11 @@ use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Components\TextInput;
 
 TextInput::make('domain')
-    ->suffixAction(
+    ->suffixAction(fn (?string $state): Action =>
         Action::make('visit')
             ->icon('heroicon-s-external-link')
             ->url(
-                fn (?string $state): ?string => filled($state) ? "https://{$state}" : null,
+                filled($state) ? "https://{$state}" : null,
                 shouldOpenInNewTab: true,
             ),
     )
@@ -465,12 +465,12 @@ TextInput::make('cost')->mask(fn (TextInput\Mask $mask) => $mask
 )
 ```
 
-There is also a `money()` method that is able to define easier formatting for currency inputs. This example, the symbol prefix is `$`, there is a `,` thousands separator, and two decimal places:
+There is also a `money()` method that is able to define easier formatting for currency inputs. This example, the symbol prefix is `€`, there is a `,` thousands separator, and two decimal places:
 
 ```php
 use Filament\Forms\Components\TextInput;
 
-TextInput::make('cost')->mask(fn (TextInput\Mask $mask) => $mask->money(prefix: '$', thousandsSeparator: ',', decimalPlaces: 2))
+TextInput::make('cost')->mask(fn (TextInput\Mask $mask) => $mask->money(prefix: '€', thousandsSeparator: ',', decimalPlaces: 2))
 ```
 
 You can also control whether the number is signed or not. While the default is to allow both negative and positive numbers, `isSigned: false` allows only positive numbers:
@@ -478,7 +478,7 @@ You can also control whether the number is signed or not. While the default is t
 ```php
 use Filament\Forms\Components\TextInput;
 
-TextInput::make('cost')->mask(fn (TextInput\Mask $mask) => $mask->money(prefix: '$', thousandsSeparator: ',', decimalPlaces: 2, isSigned: false))
+TextInput::make('cost')->mask(fn (TextInput\Mask $mask) => $mask->money(prefix: '€', thousandsSeparator: ',', decimalPlaces: 2, isSigned: false))
 ```
 
 ### Datalists
@@ -516,6 +516,8 @@ Select::make('status')
         'published' => 'Published',
     ])
 ```
+
+In the `options()` array, the array keys are saved, and the array values will be the label of each option in the dropdown.
 
 ![](https://user-images.githubusercontent.com/41773797/147612885-888dfd64-6256-482d-b4bc-840191306d2d.png)
 
@@ -1146,6 +1148,24 @@ DateTimePicker::make('date')
     ->disabledDates(['2022-10-02', '2022-10-05', '2022-10-15'])
 ```
 
+You may change the calendar icon using the `icon()` method:
+
+```php
+use Filament\Forms\Components\DateTimePicker;
+
+DateTimePicker::make('date')
+    ->icon('heroicon-o-calendar')
+```
+
+Alternatively, you may remove the icon altogether by passing `false`:
+
+```php
+use Filament\Forms\Components\DateTimePicker;
+
+DateTimePicker::make('date')
+    ->icon(false)
+```
+
 ### Timezones
 
 If you'd like users to be able to manage dates in their own timezone, you can use the `timezone()` method:
@@ -1171,6 +1191,8 @@ FileUpload::make('attachment')
 ![](https://user-images.githubusercontent.com/41773797/147613556-62c62153-4d21-4801-8a71-040d528d5757.png)
 
 By default, files will be uploaded publicly to your default storage disk.
+
+> Please note, to correctly preview images and other files, FilePond requires files to be served from the same domain as the app, or the appropriate CORS headers need to be present. Ensure that the `APP_URL` environment variable is correct, or modify the [filesystem](https://laravel.com/docs/10.x/filesystem) driver to set the correct URL. If you're hosting files on a separate domain like S3, ensure that CORS headers are set up.
 
 To change the disk and directory that files are saved in, and their visibility, use the `disk()`, `directory()` and `visibility` methods:
 
@@ -1235,15 +1257,16 @@ FileUpload::make('attachment')
     ->maxSize(1024)
 ```
 
-> To customize Livewire's default file upload validation rules, please refer to its [documentation](https://laravel-livewire.com/docs/file-uploads#global-validation).
+> To customize Livewire's default file upload validation rules, including the 12MB file size maximum, please refer to its [documentation](https://laravel-livewire.com/docs/file-uploads#global-validation).
 
-Filepond allows you to crop and resize images before they are uploaded. You can customize this behaviour using the `imageCropAspectRatio()`, `imageResizeTargetHeight()` and `imageResizeTargetWidth()` methods.
+Filepond allows you to crop and resize images before they are uploaded. You can customize this behaviour using the `imageResizeMode()`, `imageCropAspectRatio()`, `imageResizeTargetHeight()` and `imageResizeTargetWidth()` methods. `imageResizeMode()` should be set for the other methods to have an effect - either [`force`, `cover`, or `contain`](https://pqina.nl/filepond/docs/api/plugins/image-resize).
 
 ```php
 use Filament\Forms\Components\FileUpload;
 
 FileUpload::make('image')
     ->image()
+    ->imageResizeMode('cover')
     ->imageCropAspectRatio('16:9')
     ->imageResizeTargetWidth('1920')
     ->imageResizeTargetHeight('1080')
@@ -1363,6 +1386,7 @@ RichEditor::make('content')
         'orderedList',
         'redo',
         'strike',
+        'underline',
         'undo',
     ])
 RichEditor::make('content')

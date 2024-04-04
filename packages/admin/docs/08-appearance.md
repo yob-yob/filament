@@ -49,7 +49,7 @@ By default, the sidebar is only collapsible on mobile. You may make it collapsib
 
 You must [publish the configuration](installation#publishing-configuration) in order to access this feature.
 
-In `config/filament.php`, set the `layouts.sidebar.is_collapsible_on_desktop` to `true`:
+In `config/filament.php`, set the `layout.sidebar.is_collapsible_on_desktop` to `true`:
 
 ```php
 'layout' => [
@@ -63,7 +63,7 @@ In `config/filament.php`, set the `layouts.sidebar.is_collapsible_on_desktop` to
 
 By default, the topbar sticks to the top of the page.
 
-You may make the topbar scroll out of view instead by adding the following styles to your [theme](#building-theme) or by [registering a new stylesheet](#including-frontend-assets):
+You may make the topbar scroll out of view instead by adding the following styles to your [theme](#building-themes) or by [registering a new stylesheet](#including-frontend-assets):
 
 ```css
 .filament-main-topbar {
@@ -86,9 +86,11 @@ To finish installing Tailwind, you must create a new `tailwind.config.js` file i
 In `tailwind.config.js`, register the plugins you installed, and add custom colors used by the form builder:
 
 ```js
-const colors = require('tailwindcss/colors') // [tl! focus]
+import colors from 'tailwindcss/colors' // [tl! focus:start]
+import forms from '@tailwindcss/forms'
+import typography from '@tailwindcss/typography' // [tl! focus:end]
 
-module.exports = {
+export default {
     content: [
         './resources/**/*.blade.php',
         './vendor/filament/**/*.blade.php', // [tl! focus]
@@ -105,8 +107,8 @@ module.exports = {
         },
     },
     plugins: [
-        require('@tailwindcss/forms'), // [tl! focus:start]
-        require('@tailwindcss/typography'), // [tl! focus:end]
+        forms, // [tl! focus:start]
+        typography, // [tl! focus:end]
     ],
 }
 ```
@@ -135,7 +137,7 @@ export default defineConfig({
 And add Tailwind to the `postcss.config.js` file:
 
 ```js
-module.exports = {
+export default {
     plugins: {
         tailwindcss: {},
         autoprefixer: {},
@@ -163,7 +165,6 @@ Now, you may register the theme file in a service provider's `boot()` method:
 
 ```php
 use Filament\Facades\Filament;
-use Illuminate\Foundation\Vite;
 
 Filament::serving(function () {
     // Using Vite
@@ -194,7 +195,7 @@ Filament exposes a configuration option that allows you to change the maximum co
 
 You must [publish the configuration](installation#publishing-configuration) in order to access this feature.
 
-In `config/filament.php`, set the `layouts.max_content_width` to any value between `xl` and `7xl`, or `full` for no max width:
+In `config/filament.php`, set the `layout.max_content_width` to any value between `xl` and `7xl`, or `full` for no max width:
 
 ```php
 'layout' => [
@@ -252,12 +253,12 @@ Filament::pushMeta([
 
 Filament allows you to customize the position of notifications.
 
-In `config/filament.php`, set the `layouts.notifications.alignment` to any value of `left`, `center` or `right` and `layouts.notifications.vertical_alignment` to any value of `top`, `center` or `bottom`:
+In `config/filament.php`, set the `layout.notifications.alignment` to any value of `left`, `center` or `right` and `layout.notifications.vertical_alignment` to any value of `top`, `center` or `bottom`:
 
 ```php
 'layout' => [
     'notifications' => [
-        'vertical_alignment' => 'top'
+        'vertical_alignment' => 'top',
         'alignment' => 'center',
     ],
 ],
@@ -319,3 +320,9 @@ The available hooks are as follows:
 - `page.header-widgets.end` - after page header widgets
 - `page.footer-widgets.start` - before page footer widgets
 - `page.footer-widgets.end` - after page footer widgets
+- `page.actions.start` - before page actions
+- `page.actions.end` - after page actions
+- `resource.pages.list-records.table.start` - before the resource table
+- `resource.pages.list-records.table.end` - after the resource table
+- `resource.relation-manager.start` - before the relation manager table
+- `resource.relation-manager.end` - after the relation manager table

@@ -1,13 +1,14 @@
 name: fix-code-style
 
-on: push
+on:
+  push:
 
 jobs:
   fix-code-style:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           ref: ${{ github.head_ref }}
       - name: Set up Node
@@ -20,6 +21,8 @@ jobs:
         run: composer pint
       - name: Run Prettier
         run: npm run prettier
+      - name: Pull changes
+        run: git pull
       - name: Commit changes
         uses: stefanzweifel/git-auto-commit-action@v4
         with:

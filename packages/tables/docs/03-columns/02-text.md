@@ -139,29 +139,21 @@ You may want a column to contain the number of the current row in the table:
 
 ```php
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Contracts\HasTable;
 
-TextColumn::make('index')->getStateUsing(static function (stdClass $rowLoop): string {
-    return (string) $rowLoop->iteration;
-});
+TextColumn::make('index')->getStateUsing(
+    static function (stdClass $rowLoop, HasTable $livewire): string {
+        return (string) (
+            $rowLoop->iteration +
+            ($livewire->tableRecordsPerPage * (
+                $livewire->page - 1
+            ))
+        );
+    }
+),
 ```
 
-As `$rowLoop` is Laravel's Blade `$loop` object, you can reference all other `$loop` properties.
-
-As a shortcut, you may use the `rowIndex()` method:
-
-```php
-use Filament\Tables\Columns\TextColumn;
-
-TextColumn::make('index')->rowIndex()
-```
-
-To start counting from 0 instead of 1, use `isFromZero: true`:
-
-```php
-use Filament\Tables\Columns\TextColumn;
-
-TextColumn::make('index')->rowIndex(isFromZero: true)
-```
+As `$rowLoop` is Laravel Blade's `$loop` object, you can reference all other `$loop` properties.
 
 ## Custom formatting
 
@@ -172,6 +164,17 @@ use Filament\Tables\Columns\TextColumn;
 
 TextColumn::make('status')
     ->formatStateUsing(fn (string $state): string => __("statuses.{$state}"))
+```
+
+## Adding a placeholder if the cell is empty
+
+Sometimes you may want to display a placeholder if the cell's value is empty:
+
+```php
+use Filament\Tables\Columns\TextColumn;
+
+TextColumn::make('updated_at')
+    ->placeholder('Never')
 ```
 
 ## Customizing the color
@@ -263,4 +266,29 @@ TextColumn::make('email')
     ->copyable()
     ->copyMessage('Email address copied')
     ->copyMessageDuration(1500)
+```
+
+> Filament uses tooltips to display the copy message in the admin panel. If you want to use the copyable feature outside of the admin panel, make sure you have [`@ryangjchandler/alpine-tooltip` installed](https://github.com/ryangjchandler/alpine-tooltip#installation) in your app.
+
+### Customizing the text that is copied to the clipboard
+
+You can customize the text that gets copied to the clipboard using the `copyableState() method:
+
+```php
+use Filament\Tables\Columns\TextColumn;
+
+TextColumn::make('url')
+    ->copyable()
+    ->copyableState(fn (string $state): string => "URL: {$state}")
+```
+
+In this function, you can access the whole table row with `$record`:
+
+```php
+use App\Models\Post;
+use Filament\Tables\Columns\TextColumn;
+
+TextColumn::make('url')
+    ->copyable()
+    ->copyableState(fn (Post $record): string => "URL: {$record->url}")
 ```

@@ -14,8 +14,8 @@
 
 @php
     $linkClasses = [
-        'filament-link inline-flex items-center justify-center gap-0.5 font-medium hover:underline focus:outline-none focus:underline',
-        'opacity-70 cursor-not-allowed pointer-events-none' => $disabled,
+        'filament-link inline-flex items-center justify-center gap-0.5 font-medium outline-none hover:underline focus:underline',
+        'pointer-events-none cursor-not-allowed opacity-70' => $disabled,
         'text-sm' => $size === 'sm',
         'text-lg' => $size === 'lg',
         'text-primary-600 hover:text-primary-500' => $color === 'primary',
@@ -36,13 +36,15 @@
         'w-5 h-5' => $size === 'md',
         'w-6 h-6' => $size === 'lg',
         'mr-1 rtl:ml-1' => $iconPosition === 'before',
-        'ml-1 rtl:mr-1' => $iconPosition === 'after'
+        'ml-1 rtl:mr-1' => $iconPosition === 'after',
     ]);
 
-    $hasLoadingIndicator = filled($attributes->get('wire:target')) || filled($attributes->get('wire:click')) || (($type === 'submit') && filled($form));
+    $wireTarget = $attributes->whereStartsWith(['wire:target', 'wire:click'])->first();
+
+    $hasLoadingIndicator = filled($wireTarget) || ($type === 'submit' && filled($form));
 
     if ($hasLoadingIndicator) {
-        $loadingIndicatorTarget = html_entity_decode($attributes->get('wire:target', $attributes->get('wire:click', $form)), ENT_QUOTES);
+        $loadingIndicatorTarget = html_entity_decode($wireTarget ?: $form, ENT_QUOTES);
     }
 @endphp
 
@@ -60,7 +62,7 @@
         {{ $attributes->class($linkClasses) }}
     >
         @if ($icon && $iconPosition === 'before')
-            <x-dynamic-component :component="$icon" :class="$iconClasses"/>
+            <x-dynamic-component :component="$icon" :class="$iconClasses" />
         @endif
 
         {{ $slot }}

@@ -41,41 +41,41 @@ it('can register navigation', function () {
                 ->toBeInstanceOf(NavigationGroup::class)
                 ->getLabel()->toBeNull()
                 ->getItems()
-                    ->sequence(
-                        fn ($item) => $item
-                            ->getLabel()->toBe('Dashboard')
-                            ->getIcon()->toBe('heroicon-o-home'),
-                        fn ($item) => $item
-                            ->getLabel()->toBe('Users')
-                            ->getIcon()->toBe('heroicon-o-user'),
-                        fn ($item) => $item
-                            ->getLabel()->toBe('Settings')
-                            ->getIcon()->toBe('heroicon-o-cog'),
-                    )
-                    ->each->toBeInstanceOf(NavigationItem::class),
+                ->sequence(
+                    fn ($item) => $item
+                        ->getLabel()->toBe('Dashboard')
+                        ->getIcon()->toBe('heroicon-o-home'),
+                    fn ($item) => $item
+                        ->getLabel()->toBe('Users')
+                        ->getIcon()->toBe('heroicon-o-user'),
+                    fn ($item) => $item
+                        ->getLabel()->toBe('Settings')
+                        ->getIcon()->toBe('heroicon-o-cog'),
+                )
+                ->each->toBeInstanceOf(NavigationItem::class),
             fn ($group) => $group
                 ->toBeInstanceOf(NavigationGroup::class)
                 ->getLabel()->toBe('Blog')
                 ->getItems()
-                    ->sequence(
-                        fn ($item) => $item
-                            ->getLabel()->toBe('Posts')
-                            ->getIcon()->toBe('heroicon-o-document-text'),
-                        fn ($item) => $item
-                            ->getLabel()->toBe('Post Categories')
-                            ->getIcon()->toBe('heroicon-o-collection'),
-                    )
-                    ->each->toBeInstanceOf(NavigationItem::class),
+                ->sequence(
+                    fn ($item) => $item
+                        ->getLabel()->toBe('Posts')
+                        ->getIcon()->toBe('heroicon-o-document-text'),
+                    fn ($item) => $item
+                        ->getLabel()->toBe('Post Categories')
+                        ->getIcon()->toBe('heroicon-o-collection'),
+                )
+                ->each->toBeInstanceOf(NavigationItem::class),
             fn ($group) => $group
                 ->toBeInstanceOf(NavigationGroup::class)
                 ->getLabel()->toBe('Shop')
                 ->getItems()
-                    ->sequence(
-                        fn ($item) => $item
-                            ->getLabel()->toBe('Products')
-                            ->getIcon()->toBe('heroicon-o-shopping-bag'),
-                    )
-                    ->each->toBeInstanceOf(NavigationItem::class),
+                ->sequence(
+                    fn ($item) => $item
+                        ->getLabel()->toBe('Products')
+                        ->getIcon()->toBe('heroicon-o-shopping-bag'),
+                )
+                ->each->toBeInstanceOf(NavigationItem::class),
         );
 });
 
@@ -101,6 +101,53 @@ it('can register navigation groups individually', function () {
                     fn ($item) => $item
                         ->getLabel()->toBe('Post Categories')
                         ->getIcon()->toBe('heroicon-o-collection'),
+                )
+                ->each->toBeInstanceOf(NavigationItem::class),
+        );
+});
+
+it('can register navigation groups with hidden items', function () {
+    Filament::navigation(function (NavigationBuilder $navigation): NavigationBuilder {
+        return $navigation
+            ->items([
+                NavigationItem::make('Products')
+                    ->visible(false)
+                    ->label('Products'),
+                NavigationItem::make('Orders')
+                    ->hidden(fn (): bool => true)
+                    ->label('Orders'),
+                ...Dashboard::getNavigationItems(),
+                ...UserResource::getNavigationItems(),
+                ...Settings::getNavigationItems(),
+            ]);
+    });
+
+    expect(Filament::getNavigation())
+        ->sequence(
+            fn ($group) => $group
+                ->toBeInstanceOf(NavigationGroup::class)
+                ->getLabel()->toBeNull()
+                ->getItems()
+                ->sequence(
+                    fn ($item) => $item
+                        ->getLabel()->toBe('Products')
+                        ->isVisible()->toBeFalse(),
+                    fn ($item) => $item
+                        ->getLabel()->toBe('Orders')
+                        ->isHidden()->toBeTrue(),
+                    fn ($item) => $item
+                        ->getLabel()->toBe('Dashboard')
+                        ->getIcon()->toBe('heroicon-o-home')
+                        ->isVisible()->toBeTrue(),
+                    fn ($item) => $item
+                        ->getLabel()->toBe('Users')
+                        ->getIcon()->toBe('heroicon-o-user')
+                        ->isHidden()->toBeFalse(),
+                    fn ($item) => $item
+                        ->getLabel()->toBe('Settings')
+                        ->getIcon()->toBe('heroicon-o-cog')
+                        ->isVisible()->toBeTrue()
+                        ->isHidden()->toBeFalse(),
                 )
                 ->each->toBeInstanceOf(NavigationItem::class),
         );

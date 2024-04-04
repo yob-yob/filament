@@ -21,7 +21,9 @@ interface HasTable extends HasForms
 
     public function getActiveTableLocale(): ?string;
 
-    public function getAllTableRecordKeys(): array;
+    public function getAllSelectableTableRecordKeys(): array;
+
+    public function getAllSelectableTableRecordsCount(): int;
 
     public function getAllTableRecordsCount(): int;
 
@@ -75,6 +77,8 @@ interface HasTable extends HasForms
 
     public function isTableSelectionEnabled(): bool;
 
+    public function getTableRecordCheckboxPosition(): string;
+
     public function hasToggleableTableColumns(): bool;
 
     public function isTableColumnToggledHidden(string $name): bool;
@@ -96,4 +100,8 @@ interface HasTable extends HasForms
     public function toggleTableReordering(): void;
 
     public function isTableReordering(): bool;
+
+    public function isTableLoaded(): bool;
+
+    public function hasTableColumnSearches(): bool;
 }

@@ -279,9 +279,9 @@ class ListRecords extends Page implements Tables\Contracts\HasTable
             ->authorize(fn (Model $record): bool => static::getResource()::canRestore($record));
     }
 
-    protected function getViewFormSchema(): array
+    protected function getViewFormSchema(bool $isDisabled = true): array
     {
-        return $this->getResourceForm(columns: 2, isDisabled: true)->getSchema();
+        return $this->getResourceForm(columns: 2, isDisabled: $isDisabled)->getSchema();
     }
 
     protected function configureViewAction(Tables\Actions\ViewAction $action): void
@@ -290,7 +290,7 @@ class ListRecords extends Page implements Tables\Contracts\HasTable
 
         $action
             ->authorize(fn (Model $record): bool => $resource::canView($record))
-            ->form(fn (): array => $this->getViewFormSchema());
+            ->form(fn (Tables\Actions\ViewAction $action): array => $this->getViewFormSchema($action->isFormDisabled()));
 
         if ($resource::hasPage('view')) {
             $action->url(fn (Model $record): string => $resource::getUrl('view', ['record' => $record]));
@@ -350,6 +350,11 @@ class ListRecords extends Page implements Tables\Contracts\HasTable
         return $this->getResourceTable()->getBulkActions();
     }
 
+    public function isTableLoadingDeferred(): bool
+    {
+        return $this->getResourceTable()->isLoadingDeferred();
+    }
+
     protected function getTableColumns(): array
     {
         return $this->getResourceTable()->getColumns();
@@ -368,6 +373,11 @@ class ListRecords extends Page implements Tables\Contracts\HasTable
     protected function getTableFiltersLayout(): ?string
     {
         return $this->getResourceTable()->getFiltersLayout();
+    }
+
+    public function getTableRecordCheckboxPosition(): string
+    {
+        return $this->getResourceTable()->getRecordCheckboxPosition() ?? Tables\Actions\RecordCheckboxPosition::BeforeCells;
     }
 
     protected function getTableHeaderActions(): array

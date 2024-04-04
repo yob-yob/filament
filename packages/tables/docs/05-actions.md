@@ -81,6 +81,8 @@ BulkAction::make('delete')
     ->action(fn (Collection $records) => $records->each->delete())
 ```
 
+> Please note that Filament uses the parameter name `$records` in the function to inject the collection. Any other parameter name will resolve from the container instead.
+
 You may deselect the records after a bulk action has been executed using the `deselectRecordsAfterCompletion()` method:
 
 ```php
@@ -128,6 +130,20 @@ BulkAction::make('delete')
     ->action(fn (Collection $records) => $records->each->delete())
     ->deselectRecordsAfterCompletion()
     ->color('danger')
+```
+
+## Disabling record bulk actions
+
+You may conditionally disable bulk actions for a specific record:
+
+```php
+use Closure;
+use Illuminate\Database\Eloquent\Model;
+
+public function isTableRecordSelectable(): ?Closure
+{
+    return fn (Model $record): bool => $record->status === Status::Enabled;
+}
 ```
 
 ## Setting a size

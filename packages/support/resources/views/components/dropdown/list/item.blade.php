@@ -12,8 +12,8 @@
     $hasHoverAndFocusState = ($tag !== 'a' || filled($attributes->get('href')));
 
     $buttonClasses = \Illuminate\Support\Arr::toCssClasses([
-        'filament-dropdown-list-item filament-dropdown-item group flex w-full items-center whitespace-nowrap rounded-md p-2 text-sm',
-        'focus:outline-none hover:text-white focus:text-white' => $hasHoverAndFocusState,
+        'filament-dropdown-list-item filament-dropdown-item group flex w-full items-center whitespace-nowrap rounded-md p-2 text-sm outline-none',
+        'hover:text-white focus:text-white' => $hasHoverAndFocusState,
         'hover:bg-primary-500 focus:bg-primary-500' => ($color === 'primary' || $color === 'secondary') && $hasHoverAndFocusState,
         'hover:bg-danger-500 focus:bg-danger-500' => $color === 'danger' && $hasHoverAndFocusState,
         'hover:bg-success-500 focus:bg-success-500' => $color === 'success' && $hasHoverAndFocusState,
@@ -28,7 +28,7 @@
         'group-hover:text-warning-100 group-focus:text-warning-100' => $color === 'warning' && $hasHoverAndFocusState,
     ]);
 
-    $labelClasses = 'filament-dropdown-list-item-label truncate w-full text-start';
+    $labelClasses = 'filament-dropdown-list-item-label w-full truncate text-start';
 
     $iconClasses = \Illuminate\Support\Arr::toCssClasses([
         'filament-dropdown-list-item-icon mr-2 h-5 w-5 rtl:ml-2 rtl:mr-0',
@@ -40,10 +40,12 @@
         'text-warning-500' => $color === 'warning',
     ]);
 
-    $hasLoadingIndicator = filled($attributes->get('wire:target')) || filled($attributes->get('wire:click'));
+    $wireTarget = $attributes->whereStartsWith(['wire:target', 'wire:click'])->first();
+
+    $hasLoadingIndicator = filled($wireTarget);
 
     if ($hasLoadingIndicator) {
-        $loadingIndicatorTarget = html_entity_decode($attributes->get('wire:target', $attributes->get('wire:click')), ENT_QUOTES);
+        $loadingIndicatorTarget = html_entity_decode($wireTarget, ENT_QUOTES);
     }
 @endphp
 
@@ -100,7 +102,9 @@
         @endif
     </a>
 @elseif ($tag === 'form')
-    <form {{ $attributes->only(['action', 'class', 'method', 'wire:submit.prevent']) }}>
+    <form
+        {{ $attributes->only(['action', 'class', 'method', 'wire:submit.prevent']) }}
+    >
         @csrf
 
         <button
@@ -108,7 +112,10 @@
             {{ $attributes->except(['action', 'class', 'method', 'wire:submit.prevent'])->class([$buttonClasses]) }}
         >
             @if ($icon)
-                <x-dynamic-component :component="$icon" :class="$iconClasses" />
+                <x-dynamic-component
+                    :component="$icon"
+                    :class="$iconClasses"
+                />
             @endif
 
             <span class="{{ $labelClasses }}">

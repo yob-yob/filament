@@ -3,6 +3,7 @@
 namespace Filament\Forms\Components\Concerns;
 
 use Closure;
+use Filament\Forms\Components\Contracts\HasNestedRecursiveValidationRules;
 use Filament\Forms\Components\Field;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Database\Eloquent\Model;
@@ -45,6 +46,13 @@ trait CanBeValidated
     public function alphaNum(bool | Closure $condition = true): static
     {
         $this->rule('alpha_num', $condition);
+
+        return $this;
+    }
+
+    public function ascii(bool | Closure $condition = true): static
+    {
+        $this->rule('ascii', $condition);
 
         return $this;
     }
@@ -305,6 +313,16 @@ trait CanBeValidated
         return $this;
     }
 
+    public function requiredIf(string | Closure $statePath, mixed $stateValues, bool $isStatePathAbsolute = false): static
+    {
+        return $this->multiFieldValueComparisonRule('required_if', $statePath, $stateValues, $isStatePathAbsolute);
+    }
+
+    public function requiredUnless(string | Closure $statePath, mixed $stateValues, bool $isStatePathAbsolute = false): static
+    {
+        return $this->multiFieldValueComparisonRule('required_unless', $statePath, $stateValues, $isStatePathAbsolute);
+    }
+
     public function requiredWith(string | array | Closure $statePaths, bool $isStatePathAbsolute = false): static
     {
         return $this->multiFieldComparisonRule('required_with', $statePaths, $isStatePathAbsolute);
@@ -472,7 +490,7 @@ trait CanBeValidated
             }
 
             return $rule;
-        }, fn (Field $component, ?String $model): bool => (bool) ($component->evaluate($table) ?? $model));
+        }, fn (Field $component, ?string $model): bool => (bool) ($component->evaluate($table) ?? $model));
 
         return $this;
     }
@@ -522,9 +540,23 @@ trait CanBeValidated
 
     public function dehydrateValidationRules(array &$rules): void
     {
+        $statePath = $this->getStatePath();
+
         if (count($componentRules = $this->getValidationRules())) {
-            $rules[$this->getStatePath()] = $componentRules;
+            $rules[$statePath] = $componentRules;
         }
+
+        if (! $this instanceof HasNestedRecursiveValidationRules) {
+            return;
+        }
+
+        $nestedRecursiveValidationRules = $this->getNestedRecursiveValidationRules();
+
+        if (! count($nestedRecursiveValidationRules)) {
+            return;
+        }
+
+        $rules["{$statePath}.*"] = $nestedRecursiveValidationRules;
     }
 
     public function dehydrateValidationAttributes(array &$attributes): void
@@ -542,7 +574,7 @@ trait CanBeValidated
         $this->rule(static function (Field $component) use ($date, $isStatePathAbsolute, $rule): string {
             $date = $component->evaluate($date);
 
-            if (! (strtotime($date) && $isStatePathAbsolute)) {
+            if (! (strtotime($date) || $isStatePathAbsolute)) {
                 $containerStatePath = $component->getContainer()->getStatePath();
 
                 if ($containerStatePath) {
@@ -602,6 +634,30 @@ trait CanBeValidated
 
             return "{$rule}:{$statePaths}";
         }, fn (Field $component): bool => (bool) $component->evaluate($statePaths));
+
+        return $this;
+    }
+
+    public function multiFieldValueComparisonRule(string $rule, string | Closure $statePath, mixed $stateValues, bool $isStatePathAbsolute = false): static
+    {
+        $this->rule(static function (Field $component) use ($isStatePathAbsolute, $rule, $statePath, $stateValues): string {
+            $statePath = $component->evaluate($statePath);
+            $stateValues = $component->evaluate($stateValues);
+
+            if (! $isStatePathAbsolute) {
+                $containerStatePath = $component->getContainer()->getStatePath();
+
+                if ($containerStatePath) {
+                    $statePath = "{$containerStatePath}.{$statePath}";
+                }
+            }
+
+            if (is_array($stateValues)) {
+                $stateValues = implode(',', $stateValues);
+            }
+
+            return "{$rule}:{$statePath},{$stateValues}";
+        }, fn (Field $component): bool => (bool) $component->evaluate($statePath));
 
         return $this;
     }

@@ -84,6 +84,27 @@ public static function table(Table $table): Table
 }
 ```
 
+To render the filters above the table content in a collapsible panel, you may use:
+
+```php
+use Filament\Tables\Filters\Layout;
+use Filament\Resources\Table;
+
+public static function table(Table $table): Table
+{
+    return $table
+        ->columns([
+            // ...
+        ])
+        ->filters(
+            [
+                // ...
+            ],
+            layout: Layout::AboveContentCollapsible,
+        );
+}
+```
+
 ## Actions
 
 [Actions](../../tables/actions#single-actions) are buttons that are rendered at the end of table rows. They allow the user to perform a task on a record in the table. To learn how to build actions, see the [full actions documentation](../../tables/actions#single-actions).
@@ -162,6 +183,27 @@ public static function table(Table $table): Table
 }
 ```
 
+### Record select checkbox position
+
+By default, the record select checkboxes are rendered at the start of the row. You may move them to the end of the row:
+
+```php
+use Filament\Resources\Table;
+use Filament\Tables\Actions\RecordCheckboxPosition;
+
+public static function table(Table $table): Table
+{
+    return $table
+        ->recordCheckboxPosition(RecordCheckboxPosition::AfterCells)
+        ->columns([
+            // ...
+        ])
+        ->bulkActions([
+            // ...
+        ]);
+}
+```
+
 ## Reordering records
 
 To allow the user to reorder records using drag and drop in your table, you can use the `reorderable()` method:
@@ -176,6 +218,8 @@ public static function table(Table $table): Table
         ->reorderable('sort');
 }
 ```
+
+If you're using mass assignment protection on your model, you will also need to add the `sort` attribute to the `$fillable` array there.
 
 When making the table reorderable, a new button will be available on the table to toggle reordering. Pagination will be disabled in reorder mode to allow you to move records between pages.
 
@@ -224,6 +268,20 @@ protected function getTableQuery(): Builder
 {
     return parent::getTableQuery()->withoutGlobalScopes();
 }
+```
+
+## Customizing the query string
+
+Table search, filters, sorts and other stateful properties are stored in the URL as query strings. Since Filament uses Livewire internally, this behaviour can be modified by overriding the `$queryString` property on the List page of the resource. For instance, you can employ [query string aliases](https://laravel-livewire.com/docs/2.x/query-string#query-string-aliases) to rename some of the properties using `as`:
+
+```php
+protected $queryString = [
+    'isTableReordering' => ['except' => false],
+    'tableFilters' => ['as' => 'filters'], // `tableFilters` is now replaced with `filters` in the query string
+    'tableSortColumn' => ['except' => ''],
+    'tableSortDirection' => ['except' => ''],
+    'tableSearchQuery' => ['except' => '', 'as' => 'search'], // `tableSearchQuery` is now replaced with `search` in the query string
+];
 ```
 
 ## Custom view

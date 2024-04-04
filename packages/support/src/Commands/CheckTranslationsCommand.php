@@ -16,7 +16,7 @@ class CheckTranslationsCommand extends Command
                             {locales* : The locales to check.}
                             {--source=vendor : The directory containing the translations to check - either \'vendor\' or \'app\'.}';
 
-    protected $description = 'Checks for missing and removed translations.';
+    protected $description = 'Check for missing and removed translations';
 
     public function handle()
     {
@@ -71,9 +71,7 @@ class CheckTranslationsCommand extends Command
                         ];
                     })
                     ->tap(function (Collection $files) use ($locale, $package) {
-                        /** @phpstan-ignore-next-line */
                         $missingKeysCount = $files->sum(fn ($file): int => count($file['missing']));
-                        /** @phpstan-ignore-next-line */
                         $removedKeysCount = $files->sum(fn ($file): int => count($file['removed']));
 
                         $locale = locale_get_display_name($locale, 'en');

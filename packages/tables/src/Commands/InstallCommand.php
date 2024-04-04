@@ -10,7 +10,7 @@ class InstallCommand extends Command
 {
     protected $signature = 'tables:install';
 
-    protected $description = 'Set up table builder CSS and JS in a fresh Laravel installation.';
+    protected $description = 'Set up table builder CSS and JS in a fresh Laravel installation';
 
     public function __invoke(): int
     {
@@ -58,6 +58,7 @@ class InstallCommand extends Command
                 '@tailwindcss/typography' => '^0.5.4',
                 'alpinejs' => '^3.10.3',
                 'autoprefixer' => '^10.4.7',
+                'postcss' => '^8.4.14',
                 'tailwindcss' => '^3.1',
             ],
             Arr::except($packages, [

@@ -78,6 +78,10 @@ trait HasBulkActions
         } catch (Cancel $exception) {
         }
 
+        if (filled($this->redirectTo)) {
+            return $result;
+        }
+
         $this->mountedTableBulkAction = null;
         $this->selectedTableRecords = [];
 
@@ -187,5 +191,10 @@ trait HasBulkActions
     protected function getTableBulkActions(): array
     {
         return [];
+    }
+
+    public function isTableRecordSelectable(): ?Closure
+    {
+        return null;
     }
 }

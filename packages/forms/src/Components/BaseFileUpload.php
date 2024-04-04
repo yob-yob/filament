@@ -10,6 +10,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use League\Flysystem\UnableToCheckFileExistence;
 use Livewire\TemporaryUploadedFile;
 use Throwable;
 
@@ -41,6 +42,10 @@ class BaseFileUpload extends Field
 
     protected bool | Closure $shouldPreserveFilenames = false;
 
+    protected bool | Closure $shouldMoveFile = false;
+
+    protected bool | Closure $shouldStoreFiles = true;
+
     protected string | Closure | null $fileNamesStatePath = null;
 
     protected string | Closure $visibility = 'public';
@@ -67,7 +72,13 @@ class BaseFileUpload extends Field
             }
 
             $files = collect(Arr::wrap($state))
-                ->filter(static fn (string $file) => blank($file) || $component->getDisk()->exists($file))
+                ->filter(static function (string $file) use ($component): bool {
+                    try {
+                        return blank($file) || $component->getDisk()->exists($file);
+                    } catch (UnableToCheckFileExistence $exception) {
+                        return false;
+                    }
+                })
                 ->mapWithKeys(static fn (string $file): array => [((string) Str::uuid()) => $file])
                 ->all();
 
@@ -94,7 +105,7 @@ class BaseFileUpload extends Field
             $component->saveUploadedFiles();
         });
 
-        $this->dehydrateStateUsing(static function (BaseFileUpload $component, ?array $state): string | array | null {
+        $this->dehydrateStateUsing(static function (BaseFileUpload $component, ?array $state): string | array | null | TemporaryUploadedFile {
             $files = array_values($state ?? []);
 
             if ($component->isMultiple()) {
@@ -108,7 +119,11 @@ class BaseFileUpload extends Field
             /** @var FilesystemAdapter $storage */
             $storage = $component->getDisk();
 
-            if (! $storage->exists($file)) {
+            try {
+                if (! $storage->exists($file)) {
+                    return null;
+                }
+            } catch (UnableToCheckFileExistence $exception) {
                 return null;
             }
 
@@ -131,11 +146,24 @@ class BaseFileUpload extends Field
         });
 
         $this->saveUploadedFileUsing(static function (BaseFileUpload $component, TemporaryUploadedFile $file): ?string {
-            $storeMethod = $component->getVisibility() === 'public' ? 'storePubliclyAs' : 'storeAs';
-
-            if (! $file->exists()) {
+            try {
+                if (! $file->exists()) {
+                    return null;
+                }
+            } catch (UnableToCheckFileExistence $exception) {
                 return null;
             }
+
+            /** @phpstan-ignore-next-line */
+            if ($component->shouldMoveFile() && $component->getDiskName() == $file->disk) {
+                $newPath = trim($component->getDirectory() . '/' . $component->getUploadedFileNameForStorage($file), '/');
+
+                $component->getDisk()->move($file->path(), $newPath);
+
+                return $newPath;
+            }
+
+            $storeMethod = $component->getVisibility() === 'public' ? 'storePubliclyAs' : 'storeAs';
 
             return $file->{$storeMethod}(
                 $component->getDirectory(),
@@ -220,9 +248,23 @@ class BaseFileUpload extends Field
         return $this;
     }
 
+    public function storeFiles(bool | Closure $condition = true): static
+    {
+        $this->shouldStoreFiles = $condition;
+
+        return $this;
+    }
+
     public function preserveFilenames(bool | Closure $condition = true): static
     {
         $this->shouldPreserveFilenames = $condition;
+
+        return $this;
+    }
+
+    public function moveFile(bool | Closure $condition = true): static
+    {
+        $this->shouldMoveFile = $condition;
 
         return $this;
     }
@@ -375,6 +417,11 @@ class BaseFileUpload extends Field
         return $this->evaluate($this->shouldPreserveFilenames);
     }
 
+    public function shouldMoveFile(): bool
+    {
+        return $this->evaluate($this->shouldMoveFile);
+    }
+
     public function getFileNamesStatePath(): ?string
     {
         if (! $this->fileNamesStatePath) {
@@ -382,6 +429,11 @@ class BaseFileUpload extends Field
         }
 
         return $this->generateRelativeStatePath($this->fileNamesStatePath);
+    }
+
+    public function shouldStoreFiles(): bool
+    {
+        return $this->evaluate($this->shouldStoreFiles);
     }
 
     public function getValidationRules(): array
@@ -405,9 +457,10 @@ class BaseFileUpload extends Field
             $name = $this->getName();
 
             $validator = Validator::make(
-                data: [$name => $files],
-                rules: ["{$name}.*" => array_merge(['file'], parent::getValidationRules())],
-                customAttributes: ["{$name}.*" => $this->getValidationAttribute()],
+                [$name => $files],
+                ["{$name}.*" => array_merge(['file'], parent::getValidationRules())],
+                [],
+                ["{$name}.*" => $this->getValidationAttribute()],
             );
 
             if (! $validator->fails()) {
@@ -533,6 +586,10 @@ class BaseFileUpload extends Field
         if (blank($this->getState())) {
             $this->state([]);
 
+            return;
+        }
+
+        if (! $this->shouldStoreFiles()) {
             return;
         }
 

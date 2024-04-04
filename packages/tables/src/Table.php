@@ -56,7 +56,7 @@ class Table extends ViewComponent
         }
 
         if (! ($this->getContentGrid() || $this->hasColumnsLayout())) {
-            return Position::AfterCells;
+            return Position::AfterColumns;
         }
 
         $actions = $this->getActions();
@@ -80,9 +80,9 @@ class Table extends ViewComponent
         return invade($livewire)->getTableActionsColumnLabel();
     }
 
-    public function getAllRecordsCount(): int
+    public function getAllSelectableRecordsCount(): int
     {
-        return $this->getLivewire()->getAllTableRecordsCount();
+        return $this->getLivewire()->getAllSelectableTableRecordsCount();
     }
 
     public function getBulkActions(): array
@@ -198,6 +198,14 @@ class Table extends ViewComponent
         return $this->getLivewire()->getTableFiltersForm();
     }
 
+    public function getFiltersFormMaxHeight(): ?string
+    {
+        /** @var TableComponent $livewire */
+        $livewire = $this->getLivewire();
+
+        return invade($livewire)->getTableFiltersFormMaxHeight();
+    }
+
     public function getFiltersFormWidth(): ?string
     {
         /** @var TableComponent $livewire */
@@ -217,6 +225,14 @@ class Table extends ViewComponent
     public function getColumnToggleForm(): ComponentContainer
     {
         return $this->getLivewire()->getTableColumnToggleForm();
+    }
+
+    public function getColumnToggleFormMaxHeight(): ?string
+    {
+        /** @var TableComponent $livewire */
+        $livewire = $this->getLivewire();
+
+        return invade($livewire)->getTableColumnToggleFormMaxHeight();
     }
 
     public function getColumnToggleFormWidth(): ?string
@@ -339,6 +355,20 @@ class Table extends ViewComponent
         return $callback($record);
     }
 
+    public function isRecordSelectable(Model $record): bool
+    {
+        /** @var TableComponent $livewire */
+        $livewire = $this->getLivewire();
+
+        $callback = $livewire->isTableRecordSelectable();
+
+        if (! $callback) {
+            return true;
+        }
+
+        return $callback($record);
+    }
+
     public function getReorderColumn(): ?string
     {
         /** @var TableComponent $livewire */
@@ -393,6 +423,11 @@ class Table extends ViewComponent
         return $this->getLivewire()->isTableSearchable();
     }
 
+    public function getRecordCheckboxPosition(): string
+    {
+        return $this->getLivewire()->getTableRecordCheckboxPosition();
+    }
+
     public function isSearchableByColumn(): bool
     {
         return $this->getLivewire()->isTableSearchableByColumn();
@@ -422,5 +457,15 @@ class Table extends ViewComponent
         $livewire = $this->getLivewire();
 
         return invade($livewire)->isTableStriped();
+    }
+
+    public function isLoaded(): bool
+    {
+        return $this->getLivewire()->isTableLoaded();
+    }
+
+    public function hasColumnSearches(): bool
+    {
+        return $this->getLivewire()->hasTableColumnSearches();
     }
 }
