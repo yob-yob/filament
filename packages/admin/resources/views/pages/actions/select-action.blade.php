@@ -18,14 +18,16 @@
         @endif
 
         @foreach ($getOptions() as $value => $label)
-            @if(($selected = $getSelected()) !== null)
-              @if($selected == $value)
-                <option value="{{ $value }}" selected>{{ $label }}</option>
-              @else
-                <option value="{{ $value }}">{{ $label }}</option>
-              @endif
+            @if (($selected = $getSelected()) !== null)
+                @if ($selected == $value)
+                    <option value="{{ $value }}" selected>
+                        {{ $label }}
+                    </option>
+                @else
+                    <option value="{{ $value }}">{{ $label }}</option>
+                @endif
             @else
-              <option value="{{ $value }}">{{ $label }}</option>
+                <option value="{{ $value }}">{{ $label }}</option>
             @endif
         @endforeach
     </select>
